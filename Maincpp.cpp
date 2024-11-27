@@ -26,6 +26,18 @@ void drawBorders()
 		cout << "Q"; // Right border
 	}
 }
+
+void drawFloors()
+{
+	for (int i = GameConfig::FLOORS::FLOOR1;i >= GameConfig::FLOORS::FLOOR8;i -= GameConfig::FLOORDIFF)
+	{
+		for (int j = GameConfig::MIN_X + 1;j <= GameConfig::MIN_X + GameConfig::WIDTH - 1;j++)
+		{
+			gotoxy(j, i);
+			cout << "=";
+		}
+	}
+}
 	
 
 
@@ -34,6 +46,8 @@ int main()
 	Point p=Point();
 	GameObject mario(p, '@');
 	drawBorders();
+
+	drawFloors();
 	int wPressed = 0;
 	do {
 		
@@ -116,11 +130,11 @@ int main()
 	
 		if (mario.getPos().getX() < GameConfig::MIN_X + 2)
 		{
-			mario.setPos(GameConfig::MIN_X + GameConfig::WIDTH - 2,mario.getPos().getY());
+			mario.setDir(GameConfig::ARROWKEYS::STAY);
 		}
 		if (mario.getPos().getX()  > GameConfig::MIN_X + GameConfig::WIDTH - 2)
 		{
-			mario.setPos(GameConfig::MIN_X + 2, mario.getPos().getY());
+			mario.setDir(GameConfig::ARROWKEYS::STAY);
 		}
 		if (mario.getPos().getY() < GameConfig::MIN_Y + 1)
 		{
