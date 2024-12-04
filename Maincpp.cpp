@@ -2,12 +2,14 @@
 #include <conio.h>
 #include <Windows.h>
 #include <iostream>
+#include <math.h>
 #include "general.h"
+#include "Ladder.h"
+
 using namespace std;
 
 void drawBorders() 
 {
-	
 
 	// Top and bottom borders
 	for (int x = GameConfig::MIN_X; x < GameConfig::MIN_X + GameConfig::WIDTH; ++x)
@@ -38,34 +40,76 @@ void drawFloors()
 		}
 	}
 }
-	
+int nearLadder(GameObject* player, Ladder lad[],int size, GameConfig::ARROWKEYS dir) //Checks if mario is near a ladder
+{
+	int distance;
+	for (int i = 0;i < size;i++)
+	{
+		if (dir == GameConfig::UP)
+		{
+			if (player->getPos().getY() == lad[i].getPos().getY() && (abs(distance = (player->getPos().getX() - lad[i].getPos().getX())) <= 1))
+			{
+				if (distance == 1)
+					player->setPos(player->getPos().getX()-1, player->getPos().getY());
+				if (distance == -1)
+					player->setPos(player->getPos().getX() + 1, player->getPos().getY());
+				return lad[i].getSteps() + 1;
+			}
+				
+		}
+		else //Down
+		{
+			if (player->getPos().getY() == (lad[i].getPos().getY() - lad[i].getSteps()) && (abs(distance = (player->getPos().getX() - lad[i].getPos().getX())) <= 1))
+			{
+				if (distance == 1)
+					player->setPos(player->getPos().getX() - 1, player->getPos().getY());
+				if (distance == -1)
+					player->setPos(player->getPos().getX() + 1, player->getPos().getY());
+				return lad[i].getSteps() + 1;
+			}
+				
+		}
+	}
+
+	return 0;
+}
 
 
 int main()
 {
-	Point p=Point();
-	GameObject mario(p, '@');
+	GameObject mario(Point(), '@');
+	GameObject pauline(Point(GameConfig::MIN_X+2,GameConfig::FLOORS::FLOOR8-1), '$');
+	pauline.draw();
 	drawBorders();
-
 	drawFloors();
+	Ladder l(Point(GameConfig::MIN_X + 10, GameConfig::FLOOR1 - 1),2);
+	Ladder l1(Point(GameConfig::MIN_X + 30, GameConfig::FLOOR1 - 1), 2);
+	Ladder arrladders[2] = { l,l1 };
+	for (auto lad : arrladders)
+		lad.draw();
 	int wPressed = 0;
+	char keyPressed = 0;
+	int climb=0;
+	int ladderSteps = 0;
 	do {
 		
 		if (!wPressed)
 		{
 			if (_kbhit())
 			{
-				char keyPressed = _getch();
+				keyPressed = _getch();
 
 				switch (keyPressed)
 				{
 				case 'a':
 				case  'A':
+					if(climb==0)
 					mario.setDir(GameConfig::ARROWKEYS::LEFT);
 					break;
 
 				case 'd':
 				case 'D':
+					if(climb==0)
 					mario.setDir(GameConfig::ARROWKEYS::RIGHT);
 					break;
 
@@ -77,25 +121,76 @@ int main()
 				case 'W':
 				case 'w':
 				{
-					wPressed = GameConfig::JUMPSECS;
 					GameConfig::ARROWKEYS currstate = mario.getDir();
+					if (climb) // Climb Mode
+					{
+						if (currstate == GameConfig::ARROWKEYS::DOWN || currstate == GameConfig::ARROWKEYS::STAY) //Change Direction
+						{
+							climb = (ladderSteps - climb)+1;
+							mario.setDir(GameConfig::ARROWKEYS::UP);
+						}
+							
+					}
+					else //Not climb mode
+					{
+						if (currstate ==GameConfig::STAY &&(ladderSteps=nearLadder(&mario,arrladders,2,GameConfig::UP))!=0)//Mario is near a ladder
+						{
+							climb = ladderSteps;
+							mario.setDir(GameConfig::ARROWKEYS::UP);
+						}
+						else //Regular Jump
+						{
+							wPressed = GameConfig::JUMPSECS;
+							if (currstate == GameConfig::ARROWKEYS::LEFT)
+								mario.setDir(GameConfig::ARROWKEYS::UPANDLEFT);
 
-					if (currstate == GameConfig::ARROWKEYS::LEFT)
-						mario.setDir(GameConfig::ARROWKEYS::UPANDLEFT);
+							else if (currstate == GameConfig::ARROWKEYS::RIGHT)
+								mario.setDir(GameConfig::ARROWKEYS::UPANDRIGHT);
 
-					else if (currstate == GameConfig::ARROWKEYS::RIGHT)
-						mario.setDir(GameConfig::ARROWKEYS::UPANDRIGHT);
+							else //Current state is stay or down
+								mario.setDir(GameConfig::ARROWKEYS::UP);
+							
+						}
+					}
+					break;
+				}
 
-					else //Current state is stay or down
-						mario.setDir(GameConfig::ARROWKEYS::UP);
+				case 'X':
+				case 'x':
+				{
+
+					if (climb == 0)//Checks an opportunity to tumble a ladder
+					{
+						if (mario.getDir() == GameConfig::STAY && (ladderSteps = nearLadder(&mario, arrladders, 2, GameConfig::DOWN)) != 0)
+						{
+							climb = ladderSteps;
+							mario.setDir(GameConfig::ARROWKEYS::DOWN);
+						}
+					}
+					else //On climb mode
+					{
+						if (mario.getDir() == GameConfig::ARROWKEYS::UP || mario.getDir() == GameConfig::ARROWKEYS::STAY)
+						{
+							climb = (ladderSteps - climb)+1;
+							mario.setDir(GameConfig::ARROWKEYS::DOWN);
+						}
+							
+					}
 					break;
 				}
 
 				default:
 					break;
 				}
+				
 			}
-
+			if (climb > 0) //Climb Mode
+			{
+				if(mario.getDir()!=GameConfig::ARROWKEYS::STAY)
+				climb--;
+				if (climb == 0)
+					mario.setDir(GameConfig::ARROWKEYS::STAY);
+			}
 		}
 		else
 		{
@@ -128,13 +223,45 @@ int main()
 
 		}
 	
-		if (mario.getPos().getX() < GameConfig::MIN_X + 2)
+		if (mario.getPos().getX() < GameConfig::MIN_X + 2)//Reached Left Bound
 		{
+			if (wPressed > 0)// Jump Mode
+			{
+				if ((mario.getDir() != GameConfig::ARROWKEYS::UP) && (mario.getDir() != GameConfig::ARROWKEYS::DOWN)) // Diagonal Jump Mode
+				{
+					if (wPressed - 1 >= GameConfig::JUMPSECS / 2)
+						wPressed = GameConfig::JUMPSECS - wPressed;
+					if (wPressed != 0)
+						mario.setDir(GameConfig::ARROWKEYS::DOWN);
+					else
+						mario.setDir(GameConfig::ARROWKEYS::STAY);
+				}
+				
+			}
+			else if (keyPressed == 'd' || keyPressed == 'D')
+				mario.setDir(GameConfig::RIGHT);
+			else
 			mario.setDir(GameConfig::ARROWKEYS::STAY);
+
 		}
-		if (mario.getPos().getX()  > GameConfig::MIN_X + GameConfig::WIDTH - 2)
+		if (mario.getPos().getX()  > GameConfig::MIN_X + GameConfig::WIDTH - 2)// Reached Right Bound
 		{
-			mario.setDir(GameConfig::ARROWKEYS::STAY);
+			if (wPressed > 0)// Jump Mode
+			{
+				if ((mario.getDir() != GameConfig::ARROWKEYS::UP) && (mario.getDir() != GameConfig::ARROWKEYS::DOWN))// Diagonal Jump Mode
+				{
+					if (wPressed - 1 >= GameConfig::JUMPSECS / 2)
+						wPressed = GameConfig::JUMPSECS - wPressed;
+					if(wPressed!=0)
+					mario.setDir(GameConfig::ARROWKEYS::DOWN);
+					else
+						mario.setDir(GameConfig::ARROWKEYS::STAY);
+				}
+			}
+			else if (keyPressed == 'a' || keyPressed == 'A')
+				mario.setDir(GameConfig::LEFT);
+			else
+				mario.setDir(GameConfig::ARROWKEYS::STAY);
 		}
 		if (mario.getPos().getY() < GameConfig::MIN_Y + 1)
 		{
@@ -146,8 +273,10 @@ int main()
 		}
 
 		mario.move();
+		for (auto lad : arrladders)
+			lad.draw();
 		mario.draw();
-		Sleep(350);
+		Sleep(200);
 		gotoxy(mario.getPos().getX(), mario.getPos().getY());
 		cout << " ";
 	} while (true);
