@@ -22,4 +22,3 @@ public:
 	void move();
 	int getCurrentFloor() { return (GameConfig::NUMFLOORS)-((pos.getY() - (GameConfig::MIN_Y-1)) / GameConfig::FLOORDIFF); }
 };
-

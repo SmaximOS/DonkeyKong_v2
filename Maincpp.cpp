@@ -16,41 +16,83 @@ void drawBorders()
 	for (int x = GameConfig::MIN_X; x < GameConfig::MIN_X + GameConfig::WIDTH; ++x)
 	{
 		gotoxy(x, GameConfig::MIN_Y);
-		cout << "Q"; // Top border
+		cout << 'Q'; // Top border
 		gotoxy(x, GameConfig::MIN_Y + GameConfig::HEIGHT);
-		cout << "Q"; // Bottom border
+		cout << 'Q'; // Bottom border
 	}
 
 	// Left and right borders
 	for (int y = GameConfig::MIN_Y; y < GameConfig::MIN_Y + GameConfig::HEIGHT; ++y) {
 		gotoxy(GameConfig::MIN_X, y);
-		cout << "Q"; // Left border
+		cout << 'Q'; // Left border
 		gotoxy(GameConfig::MIN_X + GameConfig::WIDTH, y);
-		cout << "Q"; // Right border
+		cout << 'Q'; // Right border
 	}
+	gotoxy(GameConfig::MIN_X + GameConfig::WIDTH, GameConfig::MIN_Y + GameConfig::HEIGHT);
+	cout << 'Q';
 }
 
-void drawFloors()
+void printLives(int lives)
 {
-	for (int i = GameConfig::FLOORS::FLOOR1;i >= GameConfig::FLOORS::FLOOR8;i -= GameConfig::FLOORDIFF)
-	{
-		for (int j = GameConfig::MIN_X + 1;j <= GameConfig::MIN_X + GameConfig::WIDTH - 1;j++)
-		{
-			gotoxy(j, i);
-			cout << "=";
-		}
-	}
+	gotoxy(GameConfig::MIN_X + GameConfig::WIDTH + 3, GameConfig::MIN_Y);
+	cout << "Lives:" << lives;
 }
-bool LeaveLadder(int ypos, Ladder l)// Checks if there is an option to leave the ladder int the middle
+int getFloor(int ycoor)
 {
-	
-	for (int middlefloor = l.getPos().getY() - GameConfig::FLOORDIFF; middlefloor > l.getPos().getY() - l.getSteps() ; middlefloor -= GameConfig::FLOORDIFF)
+	return (((GameConfig::FLOOR1 - 1) - ycoor) / GameConfig::FLOORDIFF);
+}
+char getSlope(Point currpos, char board[][GameConfig::WIDTH - 2])
+{
+
+	int row = getFloor(currpos.getY());
+	int col = currpos.getX() - (GameConfig::MIN_X+1);
+	int right, left;
+    right = left = col;
+	bool stopSearch = false;
+	while (stopSearch==false&&(board[row][right] <= 1 && board[row][left] <= 1))
+	{
+		stopSearch = true;
+		if (right < GameConfig::WIDTH - 3&& board[row][right]!=0)
+		{
+			stopSearch = false;
+			right++;
+		}
+		if (left > 0 && board[row][left] != 0)
+		{
+			stopSearch = false;
+			left--;
+		}
+			
+	}
+
+	if (stopSearch)
+		return 1;
+	else if (board[row][right] > 1)
+		return board[row][right];
+	else
+		return board[row][left];
+
+}
+bool LeaveLadder(Point currPos, Ladder lad,GameConfig::ARROWKEYS dir, char board[][GameConfig::WIDTH - 2])// Checks if there is an option to leave the ladder int the middle
+{
+	int ypos = currPos.getY();
+	int xpos = currPos.getX();
+	for (int middlefloor = lad.getPos().getY() - GameConfig::FLOORDIFF; middlefloor > lad.getPos().getY() - lad.getSteps() ; middlefloor -= GameConfig::FLOORDIFF)
 	{
 		if (ypos == middlefloor)
-			return true;
+		{
+			int indexFloor = getFloor(ypos);
+			if (dir == GameConfig::LEFT && board[indexFloor][xpos - (GameConfig::MIN_X + 1) - 1] != 0)
+				return true;
+			else if (dir == GameConfig::RIGHT && board[indexFloor][xpos - (GameConfig::MIN_X + 1) + 1] != 0)
+				return true;
+			return false;
+		}
+			
 	}
 	return false;
 }
+
 
 int nearLadder(GameObject* player, Ladder lad[],int size, GameConfig::ARROWKEYS dir,int* ladderindex,int* climb) //Checks if mario is near a ladder
 {
@@ -107,105 +149,24 @@ int nearLadder(GameObject* player, Ladder lad[],int size, GameConfig::ARROWKEYS 
 
 int main()
 {
-	Level level(3);
-	level.setBoardValue(0, 0, 1); // Plain brick
-	level.setBoardValue(1, 1, 2); // Right slope
-	level.setBoardValue(2, 2, 3); // Left slope
-
-	// Set ladders
-	level.setLadder(0, Ladder(Point(0, 0), 5));
-	level.setLadder(1, Ladder(Point(1, 1), 4));
-	level.setLadder(2, Ladder(Point(2, 2), 6));
-
-	// Floor 0: Mostly plain bricks with small gaps
-	for (int col = 0; col < GameConfig::WIDTH - 2; ++col) {
-		if (col % 10 < 8) {
-			level.setBoardValue(0, col, 1); // Plain bricks
-		}
-		else {
-			level.setBoardValue(0, col, 0); // Small gaps
-		}
-	}
-
-	// Floor 1: Right slope at the start, some gaps, and plain bricks
-	level.setBoardValue(1, 0, 2); // Right slope
-	for (int col = 1; col < GameConfig::WIDTH - 2; ++col) {
-		if (col % 12 < 9) {
-			level.setBoardValue(1, col, 1); // Plain bricks
-		}
-		else {
-			level.setBoardValue(1, col, 0); // Gaps
-		}
-	}
-
-	// Floor 2: Left slope near the end, fewer gaps
-	for (int col = 0; col < GameConfig::WIDTH - 3; ++col) {
-		if (col % 15 == 13) {
-			level.setBoardValue(2, col, 3); // Left slope
-		}
-		else if (col % 12 < 8) {
-			level.setBoardValue(2, col, 1); // Plain bricks
-		}
-		else {
-			level.setBoardValue(2, col, 0); // Gaps
-		}
-	}
-
-	// Floor 3: Mix of slopes and gaps
-	for (int col = 0; col < GameConfig::WIDTH - 2; ++col) {
-		if (col % 20 == 5) {
-			level.setBoardValue(3, col, 2); // Right slope
-		}
-		else if (col % 18 == 9) {
-			level.setBoardValue(3, col, 3); // Left slope
-		}
-		else if (col % 7 < 6) {
-			level.setBoardValue(3, col, 1); // Plain bricks
-		}
-		else {
-			level.setBoardValue(3, col, 0); // Gaps
-		}
-	}
-
-	// Floor 4-7: Alternating plain bricks and slopes
-	for (int floor = 4; floor < GameConfig::NUMFLOORS; ++floor) {
-		for (int col = 0; col < GameConfig::WIDTH - 2; ++col) {
-			if ((floor + col) % 16 == 0) {
-				level.setBoardValue(floor, col, 2); // Right slope
-			}
-			else if ((floor + col) % 18 == 0) {
-				level.setBoardValue(floor, col, 3); // Left slope
-			}
-			else if (col % 9 < 8) {
-				level.setBoardValue(floor, col, 1); // Plain bricks
-			}
-			else {
-				level.setBoardValue(floor, col, 0); // Gaps
-			}
-		}
-	}
-
+	Level level =Level();
+	level.initializeBoard();
 	level.printBoard();
-
-
-
-
-
-
-	GameObject mario(Point(), '@');
-	GameObject pauline(Point(GameConfig::MIN_X+2,GameConfig::FLOORS::FLOOR8), '$');
-	pauline.draw();
 	drawBorders();
-	//drawFloors();
-	Ladder l(Point(GameConfig::MIN_X + 10, GameConfig::FLOOR1 - 1),4);
-	Ladder l1(Point(GameConfig::MIN_X + 30, GameConfig::FLOOR1 - 1), 2);
-	Ladder arrladders[2] = { l,l1 };
 
-	for (auto lad : arrladders)
-		lad.draw();
-
+	bool finished = false;
+	GameObject mario(Point(), '@');
+	GameObject pauline(Point(GameConfig::MIN_X+2,GameConfig::FLOORS::FLOOR8-1), '$');
+	pauline.draw();
+	
 	//Jump var
 	int wPressed = 0;
+
+	//Falling down var
+	int descent = 0;
+
+	//Lives
+	int lives = 3;
 
 	char keyPressed = 0;
 
@@ -219,7 +180,8 @@ int main()
 		
 		if (!wPressed) //Not Jump Mode
 		{
-			if (_kbhit())
+			
+			if (_kbhit()&&descent==0) //Confirms the player is not falling down while hitting the button
 			{
 				keyPressed = _getch();
 
@@ -227,11 +189,14 @@ int main()
 				{
 				case 'a':
 				case  'A':
-					if(climb==0)
-					mario.setDir(GameConfig::ARROWKEYS::LEFT);
+					if (climb == 0)
+					{
+						mario.setDir(GameConfig::ARROWKEYS::LEFT);
+					}
+					
 					else //Climb Mode
 					{
-						if (mario.getDir() == GameConfig::ARROWKEYS::STAY && LeaveLadder(mario.getPos().getY(), arrladders[indexofCurrLadder])) //Able to leave the ladder
+						if (mario.getDir() == GameConfig::ARROWKEYS::STAY && LeaveLadder(mario.getPos(), level.getLadder(indexofCurrLadder),GameConfig::LEFT,level.getBoardPointer())) //Able to leave the ladder
 						{
 							climb = 0;
 							mario.setDir(GameConfig::ARROWKEYS::LEFT);
@@ -247,7 +212,7 @@ int main()
 					mario.setDir(GameConfig::ARROWKEYS::RIGHT);
 					else //Climb Mode
 					{
-						if (mario.getDir() == GameConfig::ARROWKEYS::STAY && LeaveLadder(mario.getPos().getY(), arrladders[indexofCurrLadder])) //Able to leave the ladder
+						if (mario.getDir() == GameConfig::ARROWKEYS::STAY && LeaveLadder(mario.getPos(), level.getLadder(indexofCurrLadder), GameConfig::RIGHT, level.getBoardPointer())) //Able to leave the ladder
 						{
 							climb = 0;
 							mario.setDir(GameConfig::ARROWKEYS::RIGHT);
@@ -281,7 +246,7 @@ int main()
 					}
 					else //Not climb mode
 					{
-						if (currstate ==GameConfig::STAY &&(ladderSteps=nearLadder(&mario,arrladders,2,GameConfig::UP,&indexofCurrLadder,&climb))!=0)//Mario is near a ladder
+						if (currstate ==GameConfig::STAY &&(ladderSteps=nearLadder(&mario,level.getLadders(), level.getNumLadders(), GameConfig::UP, &indexofCurrLadder, &climb)) != 0)//Mario is near a ladder
 						{
 							laddermotionprev = GameConfig::ARROWKEYS::UP;
 							mario.setDir(GameConfig::ARROWKEYS::UP);
@@ -306,10 +271,10 @@ int main()
 				case 'X':
 				case 'x':
 				{
-
+					
 					if (climb == 0)//Checks an opportunity to tumble a ladder
 					{
-						if (mario.getDir() == GameConfig::STAY && (ladderSteps = nearLadder(&mario, arrladders, 2, GameConfig::DOWN,&indexofCurrLadder,&climb)) != 0)
+						if (mario.getDir() == GameConfig::STAY && (ladderSteps = nearLadder(&mario, level.getLadders(), level.getNumLadders(), GameConfig::DOWN, &indexofCurrLadder, &climb)) != 0)
 						{
 							laddermotionprev = GameConfig::ARROWKEYS::DOWN;
 							mario.setDir(GameConfig::ARROWKEYS::DOWN);
@@ -342,6 +307,74 @@ int main()
 				if (climb == 0)
 					mario.setDir(GameConfig::ARROWKEYS::STAY);
 			}
+			else if (descent > 0) //Falling Down
+			{
+				if (descent % 4 == 0) // checks if the fall shoud stop
+				{
+					int currFloor = getFloor(mario.getPos().getY());
+					if (level.getBoardValue(currFloor, mario.getPos().getX()-(GameConfig::MIN_X+1)) != 0)
+					{
+						if (descent >= GameConfig::FLOORDIFF * 3)
+							lives--;
+						switch (mario.getDir())
+						{
+						case GameConfig::DOWN:
+							mario.setDir(GameConfig::STAY);
+							break;
+						case GameConfig::DOWNANDRIGHT:
+							mario.setDir(GameConfig::RIGHT);
+							break;
+						case GameConfig::DOWNANDLEFT:
+							mario.setDir(GameConfig::LEFT);
+							break;
+
+						default:
+							break;
+						}
+						descent = 0;
+					}
+				}
+				else if (descent % 4 == 1&&mario.getDir()!=GameConfig::DOWN) //IN Case mario faces a brick while falling diagonally
+				{
+					int floortoCheck = getFloor(mario.getPos().getY()) + 1;
+					char element = level.getBoardValue(floortoCheck, (mario.getPos().getX()) - (GameConfig::MIN_X + 1));
+					gotoxy(mario.getPos().getX(), mario.getPos().getY());
+					if (element != 0)
+					{
+						switch (element)
+						{
+						case 1:
+							cout << '=';
+							break;
+						case 2:
+							cout << '>';
+							break;
+						case 3:
+							cout << '<';
+							break;
+						}
+					}
+				}
+				if(descent!=0)
+				descent++;
+			}
+			else //Check if mario reached an edge on regular mode
+			{
+				int currFloor = getFloor(mario.getPos().getY());
+				if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) == 0)
+				{
+					if (mario.getDir() == GameConfig::RIGHT)
+					{
+						mario.setDir(GameConfig::DOWNANDRIGHT);
+						descent++;
+					}
+					else
+					{
+						mario.setDir(GameConfig::DOWNANDLEFT);
+						descent++;
+					}
+				}
+			}
 		}
 		else
 		{
@@ -363,11 +396,24 @@ int main()
 				wPressed--;
 				if (wPressed == 0)
 				{
+					int currFloor = getFloor(mario.getPos().getY());
 					GameConfig::ARROWKEYS currstate = mario.getDir();
 					if (currstate == GameConfig::ARROWKEYS::DOWNANDLEFT)
-						mario.setDir(GameConfig::ARROWKEYS::LEFT);
+					{
+						if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) != 0)
+							mario.setDir(GameConfig::ARROWKEYS::LEFT);
+						else
+							descent++;
+					}
+						
 					else if (currstate == GameConfig::DOWNANDRIGHT)
-						mario.setDir(GameConfig::ARROWKEYS::RIGHT);
+					{
+						if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) != 0)
+							mario.setDir(GameConfig::ARROWKEYS::RIGHT);
+						else
+							descent++;
+					}
+						
 					else // Current State is Down
 						mario.setDir(GameConfig::ARROWKEYS::STAY);
 				}
@@ -387,11 +433,13 @@ int main()
 					else
 						mario.setDir(GameConfig::ARROWKEYS::STAY);
 				}
-				
+
 			}
+			else if (mario.getDir() == GameConfig::DOWNANDLEFT)
+				mario.setDir(GameConfig::DOWN);
 			else if (keyPressed == 'd' || keyPressed == 'D')
 				mario.setDir(GameConfig::RIGHT);
-			else
+			else if(descent==0)
 			mario.setDir(GameConfig::ARROWKEYS::STAY);
 
 		}
@@ -405,13 +453,15 @@ int main()
 						wPressed = GameConfig::JUMPSECS - wPressed;
 					if(wPressed!=0)
 					mario.setDir(GameConfig::ARROWKEYS::DOWN);
-					else
+					else if(descent==0)
 						mario.setDir(GameConfig::ARROWKEYS::STAY);
 				}
 			}
+			else if (mario.getDir() == GameConfig::DOWNANDRIGHT)
+				mario.setDir(GameConfig::DOWN);
 			else if (keyPressed == 'a' || keyPressed == 'A')
 				mario.setDir(GameConfig::LEFT);
-			else
+			else if(descent==0)
 				mario.setDir(GameConfig::ARROWKEYS::STAY);
 		}
 		if (mario.getPos().getY() < GameConfig::MIN_Y + 1)
@@ -422,16 +472,26 @@ int main()
 		{
 			break;
 		}
+		
+		
+		level.printLadders();
+		printLives(lives);
 
 		mario.move();
-		for (auto lad : arrladders)
-			lad.draw();
 		mario.draw();
 		Sleep(200);
 		gotoxy(mario.getPos().getX(), mario.getPos().getY());
 		cout << " ";
+		
+		if (mario.getPos() == pauline.getPos())
+		{
+			finished = true;
+			break;
+		}
 	} while (true);
 	
-	gotoxy(0,GameConfig::HEIGHT + 1);
+	gotoxy(0,GameConfig::HEIGHT + GameConfig::MIN_Y+1);
+	if (finished)
+		cout << "Game Won" << endl;
 	return 0;
 }

@@ -1,4 +1,4 @@
-#include <iostream>
+include <iostream>
 #include "general.h"
 #include "Ladder.h"
 
@@ -10,6 +10,7 @@ Ladder::Ladder(Point _startpos, int _steps) :startpos(_startpos),steps(_steps*Ga
 }
 Ladder::Ladder()
 {
+
 	startpos = Point();
 	steps = 1*GameConfig::FLOORDIFF;
 }
