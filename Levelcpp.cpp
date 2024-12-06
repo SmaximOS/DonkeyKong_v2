@@ -1,5 +1,5 @@
 #include"Level.h"
-
+#include "general.h"
 
     
     
@@ -38,22 +38,30 @@
     }
 
     // Method to print the board
-    void Level::printBoard() const {
-        for (int i = 0; i < 8; ++i) {
+    void Level::printBoard() const
+    {
+        int y = GameConfig::MIN_Y + GameConfig::HEIGHT-2;
+        for (int i = 0; i < GameConfig::NUMFLOORS; ++i) 
+        {
+            int x = GameConfig::MIN_X;
             for (int j = 0; j < GameConfig::WIDTH - 2; ++j)
             {
+                gotoxy(x, y);
+               
                 switch (board[i][j])
                 {
-                case '1':
+                case 1:
                     cout << '=';
-                case '2':
+                case 2:
                     cout << '>';
-                case '3':
+                case 3:
                     cout << '<';
                 default:
                     cout<< ' ';
                 }
+                x++;
             }
+            y -= GameConfig::FLOORDIFF;
             cout << endl;
         }
     }

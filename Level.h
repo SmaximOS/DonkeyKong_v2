@@ -7,6 +7,7 @@
 
 using namespace std;
 
+//Class and its data were given by CHATGPT
 class Level {
 
     char board[8][GameConfig::WIDTH - 2] ;
