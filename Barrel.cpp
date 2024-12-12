@@ -1,21 +1,19 @@
-#include "GameObject.h"
-#include <conio.h>
-#include <windows.h>
-#include <process.h>
+#include "Barrel.h"
 #include <iostream>
+#include "general.h"
 
 using namespace std;
-
-GameObject::GameObject(Point startpos, char representation)
-{
-	this->dir = GameConfig::ARROWKEYS::STAY;
-	this->pos = startpos;
-	this->representation = representation;
-}
-
-void GameObject::move()
+Barrel::Barrel(Point _startpos, GameConfig::ARROWKEYS _dir): pos(_startpos),dir(_dir)
 {
 	
+}
+void Barrel::draw()
+{
+	gotoxy(pos.getX(), pos.getY());
+	cout << 'O';
+}
+void Barrel::move()
+{
 	switch (dir)
 	{
 	case GameConfig::UP:
@@ -50,9 +48,3 @@ void GameObject::move()
 		break;
 	}
 }
-void GameObject::draw()
-{
-	gotoxy(pos.getX(), pos.getY());
-	cout << representation;
-}
-

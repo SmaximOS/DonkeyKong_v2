@@ -5,15 +5,20 @@
 #include "Ladder.h"
 #include <cstring>
 #include <stdlib.h>
+#include "Barrel.h"
 
 using namespace std;
 
 //Class and its data were given by CHATGPT
 class Level {
 
-    char board[8][GameConfig::WIDTH - 2] ;
+    char board[8][GameConfig::WIDTH - 2];
     Ladder* ladders;
     int numLadders;
+    Point startPosMario;
+    Point startPosPauline;
+    Point startPosDonkeyKong;
+    LevelSettings barrelsSets;
 
 public:
 
@@ -37,4 +42,11 @@ public:
     void printLadders()const;
     void initializeBoard();
     char(*getBoardPointer())[GameConfig::WIDTH - 2];
+    void setstartPosMario(Point p) { startPosMario.setX(p.getX());startPosMario.setY(p.getY()); }
+    Point getstartPosMario() { return startPosMario; }
+    void setstartPosPauline(Point p) { startPosPauline.setX(p.getX());startPosPauline.setY(p.getY()); }
+    Point getstartPosPauline() { return startPosPauline; }
+    void setstartPosDonkeyKong(Point p) { startPosDonkeyKong.setX(p.getX());startPosDonkeyKong.setY(p.getY()); }
+    Point getstartPosDonkeyKong() { return startPosDonkeyKong; }
+    LevelSettings getLevelSettings() { return barrelsSets; }
 };
