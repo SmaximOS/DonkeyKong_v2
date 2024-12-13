@@ -10,6 +10,38 @@
 
 using namespace std;
 
+void startMenu() {
+	system("cls");
+	cout << "======================== Donkey Kong ============================== \n";
+	cout << "\n(1)Start a new game\n";
+	cout << "(8)instructions and game controls\n";
+	cout << "(9)Leave game\n";
+	cout << "=================================================================== \n";
+	cout << "Please select an option";
+}
+
+void showInstructions() {
+	system("cls");  
+	cout << "============================ Instructions ==========================\n";
+	cout << "\nIn this game,, you play as Mario.\n";
+	cout << "Mario is given 3 chances (lives) to reach Pauline, which will be displayed in the upper-right corner of the screen\n";
+	cout << "Mario loses a life and the game restarts if he faces a barrel, falls to the abyss, falls for 3 or more floors, or find himself near a barrels explosion (2 Characters difference).\n";
+	cout << "====================================================================\n";
+	cout << "press any key to see the game controls...";
+	_getch();
+	system("cls");
+	cout << "============================ game controls ==========================\n";
+	cout << "Use the following keys to play the game:\n";
+	cout << "A / D - Move Left / Right\n";
+	cout << "W - Jump\n";
+	cout << "S - Stay\n";
+	cout << "X - Tumble Down a Ladder\n";
+	cout << "Space - Pause the Game\n";
+	cout << "====================================================================\n";
+	cout << "Press any key to return to the main menu";
+	_getch();  
+}
+
 void drawBorders()
 {
 
@@ -309,6 +341,32 @@ void restart(GameObject* mario,Point marioStartPos,vector<Barrel>* barrels,int* 
 }
 int main()
 {
+	bool gameRunning = false;
+	int menuOption = 0;
+
+	while (!gameRunning) {
+		startMenu();  
+		menuOption = _getch() - '0';  
+
+		switch (menuOption) {
+		case 1:
+			gameRunning = true;  
+			break;
+		case 8:
+			// Show instructions
+			showInstructions();
+			break;
+		case 9:
+			// Exit the game
+			cout << "\nExiting game...\n";
+			return 0;  // Exit the program
+		default:
+			// Invalid option
+			cout << "Invalid choice, please try again.\n";
+			break;
+		}
+	}
+	system("cls");
 	ShowConsoleCursor(false);
 	Level level=Level();
 	level.initializeBoard1();
