@@ -156,9 +156,9 @@ bool barrelsCheckHits(vector<Barrel>* barrels, GameObject playerPosition) //Chec
 		currIndexdeleted = false;
 		for (int j = i+1;j < (barrels->size());j++)
 		{
-			if (barrels->at(j).getPos() == barrels->at(i).getPos())
+			if (barrels->at(j).getPos().calculateDistance(barrels->at(i).getPos())<=1)//Explosion
 			{
-				if (playerPosition.getPos().calculateDistance(barrels->at(j).getPos()) < 2)
+				if ((playerPosition.getPos().calculateDistance(barrels->at(j).getPos()) <= 2)|| playerPosition.getPos().calculateDistance(barrels->at(i).getPos())<=2)
 					return true; //Mario is near the hit
 				currIndexdeleted = true;
 				barrels->erase(barrels->begin() + j);
@@ -311,7 +311,7 @@ int main()
 {
 	ShowConsoleCursor(false);
 	Level level=Level();
-	level.initializeBoard2();
+	level.initializeBoard1();
 	level.printBoard();
 	drawBorders();
 	bool finished = false;
@@ -425,8 +425,9 @@ int main()
 							laddermotionprev = GameConfig::ARROWKEYS::UP;
 							mario.setDir(GameConfig::ARROWKEYS::UP);
 						}
-						else //Regular Jump
+						else if(descent==0) //Regular Jump, Not allowed while falling
 						{
+
 							wPressed = GameConfig::JUMPSECS;
 							if (currstate == GameConfig::ARROWKEYS::LEFT)
 								mario.setDir(GameConfig::ARROWKEYS::UPANDLEFT);
@@ -538,7 +539,7 @@ int main()
 				if (descent != 0)
 					descent++;
 			}
-			else //Check if mario reached an edge on regular mode
+			else if(wPressed==0)//Check if mario reached an edge on regular mode,Relevant for non-jumping  mode
 			{
 				int currFloor = getFloor(mario.getPos().getY());
 				if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) == 0)

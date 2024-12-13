@@ -7,6 +7,8 @@
 // Destructor to free allocated memory
 Level::~Level() {
     delete[] ladders;
+    delete[]barrelsSets.intervalsBetweenBarrels;
+    delete[]barrelsSets.dirs;
 }
 
 // Setters and Getters for the board
@@ -213,9 +215,9 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
         barrelsSets.size = 4; //indicates that throwing barrels will repeat itself every 4 barrels
         barrelsSets.intervalsBetweenBarrels = new int[4];
         barrelsSets.intervalsBetweenBarrels[0] = 9; //Amount of time until first barrel, fifth barrel..
-        barrelsSets.intervalsBetweenBarrels[1] = 25; //Amount of time until second barrel, sixth barrel..
-        barrelsSets.intervalsBetweenBarrels[2] = 25;
-        barrelsSets.intervalsBetweenBarrels[3] = 25;
+        barrelsSets.intervalsBetweenBarrels[1] = 13; //Amount of time until second barrel, sixth barrel..
+        barrelsSets.intervalsBetweenBarrels[2] = 12;
+        barrelsSets.intervalsBetweenBarrels[3] = 0;
         barrelsSets.dirs = new GameConfig::ARROWKEYS[4];
         barrelsSets.dirs[0] = GameConfig::ARROWKEYS::RIGHT; //Starting direction of first,fifth.. barrels
         barrelsSets.dirs[1] = GameConfig::ARROWKEYS::LEFT;
@@ -286,7 +288,7 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
         //Floor4
         for (i = 3;i <= 26;i++)
             board[3][i] = 1;
-        board[3][3] = 3;
+        board[3][26] = 2;
 
         for (i = 32;i <= 37;i++)
             board[3][i] = 1;
@@ -299,7 +301,7 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
         //Floor5
         for (i = 30; i <= 39; i++)
             board[4][i] = 1;
-        board[4][39] = 2;
+       // board[4][39] = 2;
 
         for (i = 15; i <= 27; i++)
             board[4][i] = 1;
