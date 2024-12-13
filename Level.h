@@ -40,7 +40,8 @@ public:
     int getNumLadders() const;
     void printBoard() const;
     void printLadders()const;
-    void initializeBoard();
+    void initializeBoard1();
+    void initializeBoard2();
     char(*getBoardPointer())[GameConfig::WIDTH - 2];
     void setstartPosMario(Point p) { startPosMario.setX(p.getX());startPosMario.setY(p.getY()); }
     Point getstartPosMario() { return startPosMario; }

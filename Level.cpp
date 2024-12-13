@@ -102,7 +102,7 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
             ladders[i].draw();
         }
     }
-    void Level::initializeBoard()
+    void Level::initializeBoard1()
     {
         int i;
 
@@ -223,6 +223,176 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
         barrelsSets.dirs[3] = GameConfig::ARROWKEYS::RIGHT;
 
     }
+    void Level::initializeBoard2()
+    {
+        int i;
 
+        //Floor 1
+        for (i = 0;i <= 28;i++)
+            board[0][i] = 1;
+
+        board[0][0] = 3;//Right Slope
+
+        for (i = 31; i <= 38; i++)
+            board[0][i] = 1;
+        board[0][31] = 3;
+
+        for (i = 41;i < 52;i++)
+            board[0][i] = 1;
+        board[0][52] = 2;
+
+        //Floor2
+        for (i = 10;i <= 32;i++)
+            board[1][i] = 1;
+        board[1][32] = 2;
+
+        for (i = 47;i <= 59;i++)
+            board[1][i] = 1;
+        board[1][47] = 3;
+
+        for (i = 62;i < 90;i++)
+            board[1][i] = 1;
+        board[1][90] = 2;
+
+        //Floor3
+        for (i = 0;i <= 21;i++)
+            board[2][i] = 1;
+        board[2][21] = 2;
+
+        for (i = 28; i <= 36; i++)
+            board[2][i] = 1;
+        board[2][28] = 3;
+
+        for (i = 46; i <= 50; i++)
+            board[2][i] = 1;
+        board[2][50] = 2;
+
+        for (i = 53; i <= 57; i++)
+            board[2][i] = 1;
+        board[2][53] = 3;
+
+        for (i = 61; i <= 65; i++)
+            board[2][i] = 1;
+        board[2][65] = 2;
+
+        for (i = 68; i <= 72; i++)
+            board[2][i] = 1;
+        board[2][68] = 3;
+
+        for (i = 80;i < GameConfig::WIDTH - 2;i++)
+            board[2][i] = 1;
+        board[2][80] = 3;
+
+        //Floor4
+        for (i = 3;i <= 26;i++)
+            board[3][i] = 1;
+        board[3][3] = 3;
+
+        for (i = 32;i <= 37;i++)
+            board[3][i] = 1;
+        board[3][32] = 3;
+
+        for (i = 70;i <= 85;i++)
+            board[3][i] = 1;
+        board[3][70] = 3;
+
+        //Floor5
+        for (i = 30; i <= 39; i++)
+            board[4][i] = 1;
+        board[4][39] = 2;
+
+        for (i = 15; i <= 27; i++)
+            board[4][i] = 1;
+        board[4][15] = 3;
+
+        for (i = 2; i <= 12; i++)
+            board[4][i] = 1;
+        board[4][12] = 2;
+
+        //Floor6
+        for (i = 0; i <= 16; i++)
+            board[5][i] = 1;
+        board[5][16] = 2;
+
+        for (i = 18; i <= 22; i++)
+            board[5][i] = 1;
+        board[5][18] = 3;
+
+        for (i = 24; i <= 28; i++)
+            board[5][i] = 1;
+        board[5][24] = 3;
+
+        for (i = 30; i <= 76; i++)
+            board[5][i] = 1;
+        board[5][76] = 2;
+
+        board[5][41] = 0;
+
+        //Floor7
+        for (i = 4;i <= 19;i++)
+            board[6][i] = 1;
+        board[6][4] = 3;
+
+        for (i = 22;i <= 34;i++)
+            board[6][i] = 1;
+        board[6][34] = 2;
+
+        for (i = 37; i <= 44; i++)
+            board[6][i] = 1;
+        board[6][37] = 3;
+
+        for (i = 47;i <= 60;i++)
+            board[6][i] = 1;
+        board[6][60] = 2;
+
+        for (i = 63;i <= 73;i++)
+            board[6][i] = 1;
+        board[6][73] = 2;
+
+
+        //Floor8
+        for (i = 0;i <= 30;i++)
+            board[7][i] = 1;
+        for (i = 50;i <= 57;i++)
+            board[7][i] = 1;
+
+        //Ladders
+
+        addLadder(Ladder(Point(GameConfig::MIN_X + 12, GameConfig::FLOOR1 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 50, GameConfig::FLOOR1 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 89, GameConfig::FLOOR2 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 15, GameConfig::FLOOR2 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 6, GameConfig::FLOOR3 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 34, GameConfig::FLOOR3 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 83, GameConfig::FLOOR3 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 47, GameConfig::FLOOR3 - 1), 3));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 73, GameConfig::FLOOR3 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 5, GameConfig::FLOOR5 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 37, GameConfig::FLOOR4 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 72, GameConfig::FLOOR6 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 10, GameConfig::FLOOR7 - 1), 1));
+
+
+        //Characters starting Positions
+        setstartPosMario(Point());  //Default Position
+        setstartPosPauline(Point(GameConfig::MIN_X + 2, GameConfig::FLOORS::FLOOR8 - 1));
+        setstartPosDonkeyKong(Point(GameConfig::MIN_X + 54, GameConfig::FLOORS::FLOOR8 - 1));
+
+        //Barrels Settings
+        barrelsSets.size = 4; //indicates that throwing barrels will repeat itself every 4 barrels
+        barrelsSets.intervalsBetweenBarrels = new int[5];
+        barrelsSets.intervalsBetweenBarrels[0] = 9; //Amount of time until first barrel, fifth barrel..
+        barrelsSets.intervalsBetweenBarrels[1] = 25; //Amount of time until second barrel, sixth barrel..
+        barrelsSets.intervalsBetweenBarrels[2] = 25;
+        barrelsSets.intervalsBetweenBarrels[3] = 16;
+        barrelsSets.intervalsBetweenBarrels[4] = 22;
+        barrelsSets.dirs = new GameConfig::ARROWKEYS[5];
+        barrelsSets.dirs[0] = GameConfig::ARROWKEYS::RIGHT; //Starting direction of first,fifth.. barrels
+        barrelsSets.dirs[1] = GameConfig::ARROWKEYS::LEFT;
+        barrelsSets.dirs[2] = GameConfig::ARROWKEYS::LEFT;
+        barrelsSets.dirs[3] = GameConfig::ARROWKEYS::RIGHT;
+        barrelsSets.dirs[3] = GameConfig::ARROWKEYS::LEFT;
+
+    }
 
 

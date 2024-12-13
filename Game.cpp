@@ -40,6 +40,8 @@ void printLives(int lives)
 }
 int getFloor(int ycoor)
 {
+	if (ycoor >= GameConfig::FLOOR1)
+		return -1;
 	return (((GameConfig::FLOOR1 - 1) - ycoor) / GameConfig::FLOORDIFF);
 }
 char getSlope(Point currpos, char board[][GameConfig::WIDTH - 2])
@@ -268,12 +270,48 @@ void printBarrelTraces(vector<Barrel> barrels)
 		cout << ' ';
 	}
 }
+void pauseGame(GameObject mario,vector<Barrel> barrels)
+{
+	gotoxy(0, GameConfig::HEIGHT + GameConfig::MIN_Y + 1);
+	cout << "Game Paused";
+	char keyPressed = 0;
+	mario.draw();
+	for (auto& bar : barrels)
+		bar.draw();
+	while (keyPressed != GameConfig::SPACE)
+	{
+		if (_kbhit())
+			keyPressed = _getch();
+	}
 
+	//Print ' ' after mario
+	gotoxy(mario.getPos().getX(), mario.getPos().getY());
+	cout << " ";
+
+	//print ' ' after the barrels
+	printBarrelTraces(barrels);
+
+	//Delete the pause game caption
+	gotoxy(0, GameConfig::HEIGHT + GameConfig::MIN_Y + 1);
+	cout << "            ";
+}
+void restart(GameObject* mario,Point marioStartPos,vector<Barrel>* barrels,int* timetonextbarrel,int* climb,int* jumpsecs)
+{
+	//Mario initial position
+	mario->setPos(marioStartPos.getX(), marioStartPos.getY());
+	mario->setDir(GameConfig::STAY);
+
+	//Delete all barrels
+	barrels->clear();
+
+	//Reset other variables
+	*timetonextbarrel = *climb = *jumpsecs = 0;
+}
 int main()
 {
 	ShowConsoleCursor(false);
 	Level level=Level();
-	level.initializeBoard();
+	level.initializeBoard2();
 	level.printBoard();
 	drawBorders();
 	bool finished = false;
@@ -430,7 +468,8 @@ int main()
 					}
 					break;
 				}
-
+				case GameConfig::SPACE:
+					pauseGame(mario,barrels);
 				default:
 					break;
 				}
@@ -450,8 +489,12 @@ int main()
 					int currFloor = getFloor(mario.getPos().getY());
 					if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) != 0)
 					{
-						if (descent >= GameConfig::FLOORDIFF * 3)
+						if (descent >= GameConfig::FLOORDIFF * 3) //Mario fell 3 floors or more
+						{
 							lives--;
+							restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
+						}
+							
 						switch (mario.getDir())
 						{
 						case GameConfig::DOWN:
@@ -472,6 +515,7 @@ int main()
 				}
 				else if (descent % 4 == 1 && mario.getDir() != GameConfig::DOWN) //IN Case mario faces a brick while falling diagonally
 				{
+
 					int floortoCheck = getFloor(mario.getPos().getY()) + 1;
 					char element = level.getBoardValue(floortoCheck, (mario.getPos().getX()) - (GameConfig::MIN_X + 1));
 					gotoxy(mario.getPos().getX(), mario.getPos().getY());
@@ -600,9 +644,10 @@ int main()
 			else if (descent == 0)
 				mario.setDir(GameConfig::ARROWKEYS::STAY);
 		}
-		if (mario.getPos().getY() > GameConfig::MIN_Y + GameConfig::HEIGHT - 1)
+		if (mario.getPos().getY() >= GameConfig::MIN_Y + GameConfig::HEIGHT - 1) //Mario Fell Down
 		{
-			break;
+			lives--;
+			restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
 		}
 
 		//Barrels
@@ -623,22 +668,30 @@ int main()
 			barel.move();
 		
 		if (barrelsCheckHits(&barrels, mario)) //delete barrels that share same position (explosion)
-			break; //Mario is near an explosion
-		if (marioHitsBarrel(barrels, mario))
-			break; //mario hit a barrel
-		for (int i=0;i<barrels.size();i++) //erasing all the barrels that are out of bounds
+		{
+			//Mario is near an explosion
+			lives--;
+			restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
+		}
+			
+		
+		for (int i = 0;i < barrels.size();i++) //erasing all the barrels that are out of bounds
 		{
 			if (outOfBounds(barrels[i].getPos()))
 				barrels.erase(barrels.begin() + i);
 		}
-
-		for (auto& barel : barrels) //Draw the barrels
-			barel.draw();
-
+		mario.move();
+		if (marioHitsBarrel(barrels, mario))
+		{
+			//mario hit a barrel
+			lives--;
+			restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
+		}
 		level.printLadders();
 		printLives(lives);
-		mario.move();
 		mario.draw();
+		for (auto& barel : barrels) //Draw the barrels
+			barel.draw();
 		Sleep(170);
 
 		//Print ' ' after mario
@@ -653,7 +706,7 @@ int main()
 			finished = true;
 			break;
 		}
-	} while (true);
+	} while (lives>0);
 
 	
 	if (finished)

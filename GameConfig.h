@@ -10,6 +10,7 @@ public:
 	static int constexpr WIDTH = 105;
 	static int constexpr HEIGHT = 33;
 	static int constexpr ESC = 27;
+	static int constexpr SPACE = 32;
 	static int constexpr FLOORDIFF = 4;
 	static int constexpr NUMFLOORS = 8;
 	enum FLOORS {
