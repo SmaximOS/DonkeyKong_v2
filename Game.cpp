@@ -42,6 +42,22 @@ void showInstructions() {
 	_getch();  
 }
 
+int lvlSelect() {
+	system("cls");
+	cout << "========================= Level selection ==========================\n";
+	cout << "Select the level you wish to play on: \n";
+	cout << "(1)\n(2)\n";
+	cout << "====================================================================\n";
+	char keyPressed = _getch();
+	switch (keyPressed) {
+	case '1' :
+		return 1;
+
+	case '2':
+		return 2;
+	}
+}
+
 void drawBorders()
 {
 
@@ -342,15 +358,16 @@ void restart(GameObject* mario,Point marioStartPos,vector<Barrel>* barrels,int* 
 int main()
 {
 	bool gameRunning = false;
-	int menuOption = 0;
+	int menuOption = 0, currLvl = 0;
 
-	while (!gameRunning) {
-		startMenu();  
-		menuOption = _getch() - '0';  
+	while (true) {
+		startMenu();
+		menuOption = _getch() - '0';
 
 		switch (menuOption) {
 		case 1:
-			gameRunning = true;  
+			gameRunning = true;
+			currLvl = lvlSelect();
 			break;
 		case 8:
 			// Show instructions
@@ -365,419 +382,426 @@ int main()
 			cout << "Invalid choice, please try again.\n";
 			break;
 		}
-	}
-	system("cls");
-	ShowConsoleCursor(false);
-	Level level=Level();
-	level.initializeBoard1();
-	level.printBoard();
-	drawBorders();
-	bool finished = false;
+		
+		if (gameRunning) {
+			system("cls");
+			ShowConsoleCursor(false);
+			Level level = Level();
+			if (currLvl == 1)
+				level.initializeBoard1();
+			else
+				level.initializeBoard2();
+			level.printBoard();
+			drawBorders();
+			bool finished = false;
 
-	GameObject mario(level.getstartPosMario(), '@');
-	GameObject pauline(level.getstartPosPauline(), '$');
-	GameObject donkeyKong(level.getstartPosDonkeyKong(), '&');
+			GameObject mario(level.getstartPosMario(), '@');
+			GameObject pauline(level.getstartPosPauline(), '$');
+			GameObject donkeyKong(level.getstartPosDonkeyKong(), '&');
 
-	donkeyKong.draw();
-	pauline.draw();
+			donkeyKong.draw();
+			pauline.draw();
 
-	//Jump var
-	int wPressed = 0;
+			//Jump var
+			int wPressed = 0;
 
-	//Falling down var
-	int descent = 0;
+			//Falling down var
+			int descent = 0;
 
-	//Lives
-	int lives = 3;
+			//Lives
+			int lives = 3;
 
-	char keyPressed = 0;
+			char keyPressed = 0;
 
-	//Ladder vars
-	int climb = 0;
-	int ladderSteps = 0;
-	GameConfig::ARROWKEYS laddermotionprev;
-	int indexofCurrLadder = -1;
+			//Ladder vars
+			int climb = 0;
+			int ladderSteps = 0;
+			GameConfig::ARROWKEYS laddermotionprev;
+			int indexofCurrLadder = -1;
 
-	//GameSeconds
-	int timePlayed = 0;
+			//GameSeconds
+			int timePlayed = 0;
 
-	//Barrels
-	vector<Barrel> barrels;
-	LevelSettings currSettings = level.getLevelSettings();
-	int timetonextbarrel = 0;
-	int currbarrelindex = 0;
+			//Barrels
+			vector<Barrel> barrels;
+			LevelSettings currSettings = level.getLevelSettings();
+			int timetonextbarrel = 0;
+			int currbarrelindex = 0;
 
 
-	do {
+			do {
 
-		if (!wPressed) //Not Jump Mode
-		{
-
-			if (_kbhit() && descent == 0) //Confirms the player is not falling down while hitting the button
-			{
-				keyPressed = _getch();
-
-				switch (keyPressed)
+				if (!wPressed) //Not Jump Mode
 				{
-				case 'a':
-				case  'A':
-					if (climb == 0)
+
+					if (_kbhit() && descent == 0) //Confirms the player is not falling down while hitting the button
 					{
-						mario.setDir(GameConfig::ARROWKEYS::LEFT);
-					}
+						keyPressed = _getch();
 
-					else //Climb Mode
-					{
-						if (mario.getDir() == GameConfig::ARROWKEYS::STAY && LeaveLadder(mario.getPos(), level.getLadder(indexofCurrLadder), GameConfig::LEFT, level.getBoardPointer())) //Able to leave the ladder
+						switch (keyPressed)
 						{
-							climb = 0;
-							mario.setDir(GameConfig::ARROWKEYS::LEFT);
-						}
+						case 'a':
+						case  'A':
+							if (climb == 0)
+							{
+								mario.setDir(GameConfig::ARROWKEYS::LEFT);
+							}
+
+							else //Climb Mode
+							{
+								if (mario.getDir() == GameConfig::ARROWKEYS::STAY && LeaveLadder(mario.getPos(), level.getLadder(indexofCurrLadder), GameConfig::LEFT, level.getBoardPointer())) //Able to leave the ladder
+								{
+									climb = 0;
+									mario.setDir(GameConfig::ARROWKEYS::LEFT);
+								}
 
 
-					}
-					break;
+							}
+							break;
 
-				case 'd':
-				case 'D':
-					if (climb == 0)
-						mario.setDir(GameConfig::ARROWKEYS::RIGHT);
-					else //Climb Mode
-					{
-						if (mario.getDir() == GameConfig::ARROWKEYS::STAY && LeaveLadder(mario.getPos(), level.getLadder(indexofCurrLadder), GameConfig::RIGHT, level.getBoardPointer())) //Able to leave the ladder
+						case 'd':
+						case 'D':
+							if (climb == 0)
+								mario.setDir(GameConfig::ARROWKEYS::RIGHT);
+							else //Climb Mode
+							{
+								if (mario.getDir() == GameConfig::ARROWKEYS::STAY && LeaveLadder(mario.getPos(), level.getLadder(indexofCurrLadder), GameConfig::RIGHT, level.getBoardPointer())) //Able to leave the ladder
+								{
+									climb = 0;
+									mario.setDir(GameConfig::ARROWKEYS::RIGHT);
+								}
+
+							}
+
+							break;
+
+						case 'S':
+						case 's':
+
+							mario.setDir(GameConfig::ARROWKEYS::STAY);
+							break;
+
+						case 'W':
+						case 'w':
 						{
-							climb = 0;
-							mario.setDir(GameConfig::ARROWKEYS::RIGHT);
-						}
+							GameConfig::ARROWKEYS currstate = mario.getDir();
+							if (climb) // Climb Mode
+							{
+								if (currstate == GameConfig::ARROWKEYS::DOWN || (currstate == GameConfig::ARROWKEYS::STAY && laddermotionprev == GameConfig::DOWN)) //Change Direction
+								{
 
-					}
+									climb = (ladderSteps - climb) + 1;
 
-					break;
-
-				case 'S':
-				case 's':
-
-					mario.setDir(GameConfig::ARROWKEYS::STAY);
-					break;
-
-				case 'W':
-				case 'w':
-				{
-					GameConfig::ARROWKEYS currstate = mario.getDir();
-					if (climb) // Climb Mode
-					{
-						if (currstate == GameConfig::ARROWKEYS::DOWN || (currstate == GameConfig::ARROWKEYS::STAY && laddermotionprev == GameConfig::DOWN)) //Change Direction
-						{
-
-							climb = (ladderSteps - climb) + 1;
-
-						}
-						laddermotionprev = GameConfig::ARROWKEYS::UP;
-						mario.setDir(GameConfig::ARROWKEYS::UP);
-
-					}
-					else //Not climb mode
-					{
-						if (currstate == GameConfig::STAY && (ladderSteps = nearLadder(&mario, level.getLadders(), level.getNumLadders(), GameConfig::UP, &indexofCurrLadder, &climb)) != 0)//Mario is near a ladder
-						{
-							laddermotionprev = GameConfig::ARROWKEYS::UP;
-							mario.setDir(GameConfig::ARROWKEYS::UP);
-						}
-						else if(descent==0) //Regular Jump, Not allowed while falling
-						{
-
-							wPressed = GameConfig::JUMPSECS;
-							if (currstate == GameConfig::ARROWKEYS::LEFT)
-								mario.setDir(GameConfig::ARROWKEYS::UPANDLEFT);
-
-							else if (currstate == GameConfig::ARROWKEYS::RIGHT)
-								mario.setDir(GameConfig::ARROWKEYS::UPANDRIGHT);
-
-							else //Current state is stay or down
+								}
+								laddermotionprev = GameConfig::ARROWKEYS::UP;
 								mario.setDir(GameConfig::ARROWKEYS::UP);
 
-						}
-					}
-					break;
-				}
+							}
+							else //Not climb mode
+							{
+								if (currstate == GameConfig::STAY && (ladderSteps = nearLadder(&mario, level.getLadders(), level.getNumLadders(), GameConfig::UP, &indexofCurrLadder, &climb)) != 0)//Mario is near a ladder
+								{
+									laddermotionprev = GameConfig::ARROWKEYS::UP;
+									mario.setDir(GameConfig::ARROWKEYS::UP);
+								}
+								else if (descent == 0) //Regular Jump, Not allowed while falling
+								{
 
-				case 'X':
-				case 'x':
-				{
+									wPressed = GameConfig::JUMPSECS;
+									if (currstate == GameConfig::ARROWKEYS::LEFT)
+										mario.setDir(GameConfig::ARROWKEYS::UPANDLEFT);
 
-					if (climb == 0)//Checks an opportunity to tumble a ladder
-					{
-						if (mario.getDir() == GameConfig::STAY && (ladderSteps = nearLadder(&mario, level.getLadders(), level.getNumLadders(), GameConfig::DOWN, &indexofCurrLadder, &climb)) != 0)
-						{
-							laddermotionprev = GameConfig::ARROWKEYS::DOWN;
-							mario.setDir(GameConfig::ARROWKEYS::DOWN);
-						}
-					}
-					else //On climb mode
-					{
-						if (mario.getDir() == GameConfig::ARROWKEYS::UP || (mario.getDir() == GameConfig::ARROWKEYS::STAY && laddermotionprev == GameConfig::UP))
-						{
+									else if (currstate == GameConfig::ARROWKEYS::RIGHT)
+										mario.setDir(GameConfig::ARROWKEYS::UPANDRIGHT);
 
-							climb = (ladderSteps - climb) + 1;
+									else //Current state is stay or down
+										mario.setDir(GameConfig::ARROWKEYS::UP);
 
-						}
-						laddermotionprev = GameConfig::ARROWKEYS::DOWN;
-						mario.setDir(GameConfig::ARROWKEYS::DOWN);
-
-					}
-					break;
-				}
-				case GameConfig::SPACE:
-					pauseGame(mario,barrels);
-				default:
-					break;
-				}
-
-			}
-			if (climb > 0) //Climb Mode
-			{
-				if (mario.getDir() != GameConfig::ARROWKEYS::STAY)
-					climb--;
-				if (climb == 0)
-					mario.setDir(GameConfig::ARROWKEYS::STAY);
-			}
-			else if (descent > 0) //Falling Down
-			{
-				if (descent % 4 == 0) // checks if the fall shoud stop
-				{
-					int currFloor = getFloor(mario.getPos().getY());
-					if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) != 0)
-					{
-						if (descent >= GameConfig::FLOORDIFF * 3) //Mario fell 3 floors or more
-						{
-							lives--;
-							restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
-						}
-							
-						switch (mario.getDir())
-						{
-						case GameConfig::DOWN:
-							mario.setDir(GameConfig::STAY);
+								}
+							}
 							break;
-						case GameConfig::DOWNANDRIGHT:
-							mario.setDir(GameConfig::RIGHT);
-							break;
-						case GameConfig::DOWNANDLEFT:
-							mario.setDir(GameConfig::LEFT);
-							break;
+						}
 
+						case 'X':
+						case 'x':
+						{
+
+							if (climb == 0)//Checks an opportunity to tumble a ladder
+							{
+								if (mario.getDir() == GameConfig::STAY && (ladderSteps = nearLadder(&mario, level.getLadders(), level.getNumLadders(), GameConfig::DOWN, &indexofCurrLadder, &climb)) != 0)
+								{
+									laddermotionprev = GameConfig::ARROWKEYS::DOWN;
+									mario.setDir(GameConfig::ARROWKEYS::DOWN);
+								}
+							}
+							else //On climb mode
+							{
+								if (mario.getDir() == GameConfig::ARROWKEYS::UP || (mario.getDir() == GameConfig::ARROWKEYS::STAY && laddermotionprev == GameConfig::UP))
+								{
+
+									climb = (ladderSteps - climb) + 1;
+
+								}
+								laddermotionprev = GameConfig::ARROWKEYS::DOWN;
+								mario.setDir(GameConfig::ARROWKEYS::DOWN);
+
+							}
+							break;
+						}
+						case GameConfig::SPACE:
+							pauseGame(mario, barrels);
 						default:
 							break;
 						}
-						descent = 0;
-					}
-				}
-				else if (descent % 4 == 1 && mario.getDir() != GameConfig::DOWN) //IN Case mario faces a brick while falling diagonally
-				{
 
-					int floortoCheck = getFloor(mario.getPos().getY()) + 1;
-					char element = level.getBoardValue(floortoCheck, (mario.getPos().getX()) - (GameConfig::MIN_X + 1));
-					gotoxy(mario.getPos().getX(), mario.getPos().getY());
-					if (element != 0)
+					}
+					if (climb > 0) //Climb Mode
 					{
-						switch (element)
+						if (mario.getDir() != GameConfig::ARROWKEYS::STAY)
+							climb--;
+						if (climb == 0)
+							mario.setDir(GameConfig::ARROWKEYS::STAY);
+					}
+					else if (descent > 0) //Falling Down
+					{
+						if (descent % 4 == 0) // checks if the fall shoud stop
 						{
-						case 1:
-							cout << '=';
-							break;
-						case 2:
-							cout << '>';
-							break;
-						case 3:
-							cout << '<';
-							break;
+							int currFloor = getFloor(mario.getPos().getY());
+							if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) != 0)
+							{
+								if (descent >= GameConfig::FLOORDIFF * 3) //Mario fell 3 floors or more
+								{
+									lives--;
+									restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
+								}
+
+								switch (mario.getDir())
+								{
+								case GameConfig::DOWN:
+									mario.setDir(GameConfig::STAY);
+									break;
+								case GameConfig::DOWNANDRIGHT:
+									mario.setDir(GameConfig::RIGHT);
+									break;
+								case GameConfig::DOWNANDLEFT:
+									mario.setDir(GameConfig::LEFT);
+									break;
+
+								default:
+									break;
+								}
+								descent = 0;
+							}
+						}
+						else if (descent % 4 == 1 && mario.getDir() != GameConfig::DOWN) //IN Case mario faces a brick while falling diagonally
+						{
+
+							int floortoCheck = getFloor(mario.getPos().getY()) + 1;
+							char element = level.getBoardValue(floortoCheck, (mario.getPos().getX()) - (GameConfig::MIN_X + 1));
+							gotoxy(mario.getPos().getX(), mario.getPos().getY());
+							if (element != 0)
+							{
+								switch (element)
+								{
+								case 1:
+									cout << '=';
+									break;
+								case 2:
+									cout << '>';
+									break;
+								case 3:
+									cout << '<';
+									break;
+								}
+							}
+						}
+						if (descent != 0)
+							descent++;
+					}
+					else if (wPressed == 0)//Check if mario reached an edge on regular mode,Relevant for non-jumping  mode
+					{
+						int currFloor = getFloor(mario.getPos().getY());
+						if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) == 0)
+						{
+							if (mario.getDir() == GameConfig::RIGHT)
+							{
+								mario.setDir(GameConfig::DOWNANDRIGHT);
+								descent++;
+							}
+							else
+							{
+								mario.setDir(GameConfig::DOWNANDLEFT);
+								descent++;
+							}
 						}
 					}
 				}
-				if (descent != 0)
-					descent++;
-			}
-			else if(wPressed==0)//Check if mario reached an edge on regular mode,Relevant for non-jumping  mode
-			{
-				int currFloor = getFloor(mario.getPos().getY());
-				if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) == 0)
+				else
 				{
-					if (mario.getDir() == GameConfig::RIGHT)
+					if (wPressed - 1 == GameConfig::JUMPSECS / 2)
 					{
-						mario.setDir(GameConfig::DOWNANDRIGHT);
-						descent++;
+
+						GameConfig::ARROWKEYS currstate = mario.getDir();
+
+						if (currstate == GameConfig::UPANDLEFT)
+							mario.setDir(GameConfig::ARROWKEYS::DOWNANDLEFT);
+						else if (currstate == GameConfig::UPANDRIGHT)
+						{
+							mario.setDir(GameConfig::ARROWKEYS::DOWNANDRIGHT);
+						}
+
+						else // Current State is Up
+							mario.setDir(GameConfig::ARROWKEYS::DOWN);
 					}
-					else
+					wPressed--;
+					if (wPressed == 0)
 					{
-						mario.setDir(GameConfig::DOWNANDLEFT);
-						descent++;
+						int currFloor = getFloor(mario.getPos().getY());
+						GameConfig::ARROWKEYS currstate = mario.getDir();
+						if (currstate == GameConfig::ARROWKEYS::DOWNANDLEFT)
+						{
+							if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) != 0)
+								mario.setDir(GameConfig::ARROWKEYS::LEFT);
+							else
+								descent++;
+						}
+
+						else if (currstate == GameConfig::DOWNANDRIGHT)
+						{
+							if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) != 0)
+								mario.setDir(GameConfig::ARROWKEYS::RIGHT);
+							else
+								descent++;
+						}
+
+						else // Current State is Down
+							mario.setDir(GameConfig::ARROWKEYS::STAY);
 					}
-				}
-			}
-		}
-		else
-		{
-			if (wPressed - 1 == GameConfig::JUMPSECS / 2)
-			{
 
-				GameConfig::ARROWKEYS currstate = mario.getDir();
-
-				if (currstate == GameConfig::UPANDLEFT)
-					mario.setDir(GameConfig::ARROWKEYS::DOWNANDLEFT);
-				else if (currstate == GameConfig::UPANDRIGHT)
-				{
-					mario.setDir(GameConfig::ARROWKEYS::DOWNANDRIGHT);
 				}
 
-				else // Current State is Up
-					mario.setDir(GameConfig::ARROWKEYS::DOWN);
-			}
-			wPressed--;
-			if (wPressed == 0)
-			{
-				int currFloor = getFloor(mario.getPos().getY());
-				GameConfig::ARROWKEYS currstate = mario.getDir();
-				if (currstate == GameConfig::ARROWKEYS::DOWNANDLEFT)
+				if (mario.getPos().getX() < GameConfig::MIN_X + 2)//Reached Left Bound
 				{
-					if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) != 0)
-						mario.setDir(GameConfig::ARROWKEYS::LEFT);
-					else
-						descent++;
-				}
+					if (wPressed > 0)// Jump Mode
+					{
+						if ((mario.getDir() != GameConfig::ARROWKEYS::UP) && (mario.getDir() != GameConfig::ARROWKEYS::DOWN)) // Diagonal Jump Mode
+						{
+							if (wPressed - 1 >= GameConfig::JUMPSECS / 2)
+								wPressed = GameConfig::JUMPSECS - wPressed;
+							if (wPressed != 0)
+								mario.setDir(GameConfig::ARROWKEYS::DOWN);
+							else
+								mario.setDir(GameConfig::ARROWKEYS::STAY);
+						}
 
-				else if (currstate == GameConfig::DOWNANDRIGHT)
-				{
-					if (level.getBoardValue(currFloor, mario.getPos().getX() - (GameConfig::MIN_X + 1)) != 0)
-						mario.setDir(GameConfig::ARROWKEYS::RIGHT);
-					else
-						descent++;
-				}
-
-				else // Current State is Down
-					mario.setDir(GameConfig::ARROWKEYS::STAY);
-			}
-
-		}
-
-		if (mario.getPos().getX() < GameConfig::MIN_X + 2)//Reached Left Bound
-		{
-			if (wPressed > 0)// Jump Mode
-			{
-				if ((mario.getDir() != GameConfig::ARROWKEYS::UP) && (mario.getDir() != GameConfig::ARROWKEYS::DOWN)) // Diagonal Jump Mode
-				{
-					if (wPressed - 1 >= GameConfig::JUMPSECS / 2)
-						wPressed = GameConfig::JUMPSECS - wPressed;
-					if (wPressed != 0)
-						mario.setDir(GameConfig::ARROWKEYS::DOWN);
-					else
+					}
+					else if (mario.getDir() == GameConfig::DOWNANDLEFT)
+						mario.setDir(GameConfig::DOWN);
+					else if (keyPressed == 'd' || keyPressed == 'D')
+						mario.setDir(GameConfig::RIGHT);
+					else if (descent == 0)
 						mario.setDir(GameConfig::ARROWKEYS::STAY);
+
 				}
-
-			}
-			else if (mario.getDir() == GameConfig::DOWNANDLEFT)
-				mario.setDir(GameConfig::DOWN);
-			else if (keyPressed == 'd' || keyPressed == 'D')
-				mario.setDir(GameConfig::RIGHT);
-			else if (descent == 0)
-				mario.setDir(GameConfig::ARROWKEYS::STAY);
-
-		}
-		if (mario.getPos().getX() > GameConfig::MIN_X + GameConfig::WIDTH - 2)// Reached Right Bound
-		{
-			if (wPressed > 0)// Jump Mode
-			{
-				if ((mario.getDir() != GameConfig::ARROWKEYS::UP) && (mario.getDir() != GameConfig::ARROWKEYS::DOWN))// Diagonal Jump Mode
+				if (mario.getPos().getX() > GameConfig::MIN_X + GameConfig::WIDTH - 2)// Reached Right Bound
 				{
-					if (wPressed - 1 >= GameConfig::JUMPSECS / 2)
-						wPressed = GameConfig::JUMPSECS - wPressed;
-					if (wPressed != 0)
-						mario.setDir(GameConfig::ARROWKEYS::DOWN);
+					if (wPressed > 0)// Jump Mode
+					{
+						if ((mario.getDir() != GameConfig::ARROWKEYS::UP) && (mario.getDir() != GameConfig::ARROWKEYS::DOWN))// Diagonal Jump Mode
+						{
+							if (wPressed - 1 >= GameConfig::JUMPSECS / 2)
+								wPressed = GameConfig::JUMPSECS - wPressed;
+							if (wPressed != 0)
+								mario.setDir(GameConfig::ARROWKEYS::DOWN);
+							else if (descent == 0)
+								mario.setDir(GameConfig::ARROWKEYS::STAY);
+						}
+					}
+					else if (mario.getDir() == GameConfig::DOWNANDRIGHT)
+						mario.setDir(GameConfig::DOWN);
+					else if (keyPressed == 'a' || keyPressed == 'A')
+						mario.setDir(GameConfig::LEFT);
 					else if (descent == 0)
 						mario.setDir(GameConfig::ARROWKEYS::STAY);
 				}
+				if (mario.getPos().getY() >= GameConfig::MIN_Y + GameConfig::HEIGHT - 1) //Mario Fell Down
+				{
+					lives--;
+					restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
+				}
+
+				//Barrels
+				if (timetonextbarrel == currSettings.intervalsBetweenBarrels[currbarrelindex]) //Time to add next barrel
+				{
+					barrels.push_back(Barrel(donkeyKong.getPos(), currSettings.dirs[currbarrelindex]));
+					currbarrelindex++;
+					if (currbarrelindex == currSettings.size)
+						currbarrelindex = 0;
+					timetonextbarrel = 0;
+				}
+				else
+					timetonextbarrel++;
+
+				barrelsUpdateDirs(&barrels, level.getBoardPointer());//Set the exact direction for each barrel
+
+				for (auto& barel : barrels) //Move the barrels
+					barel.move();
+
+				if (barrelsCheckHits(&barrels, mario)) //delete barrels that share same position (explosion)
+				{
+					//Mario is near an explosion
+					lives--;
+					restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
+				}
+
+
+				for (int i = 0; i < barrels.size(); i++) //erasing all the barrels that are out of bounds
+				{
+					if (outOfBounds(barrels[i].getPos()))
+						barrels.erase(barrels.begin() + i);
+				}
+				mario.move();
+				if (marioHitsBarrel(barrels, mario))
+				{
+					//mario hit a barrel
+					lives--;
+					restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
+				}
+				level.printLadders();
+				printLives(lives);
+				mario.draw();
+				for (auto& barel : barrels) //Draw the barrels
+					barel.draw();
+				Sleep(170);
+
+				//Print ' ' after mario
+				gotoxy(mario.getPos().getX(), mario.getPos().getY());
+				cout << " ";
+				//Print ' ' after the barrels
+				printBarrelTraces(barrels);
+
+
+				if (mario.getPos() == pauline.getPos())
+				{
+					finished = true;
+					break;
+				}
+			} while (lives > 0);
+
+
+			if (finished)
+			{
+				gotoxy(0, GameConfig::HEIGHT + GameConfig::MIN_Y + 1);
+				cout << "Game Won" << endl;
 			}
-			else if (mario.getDir() == GameConfig::DOWNANDRIGHT)
-				mario.setDir(GameConfig::DOWN);
-			else if (keyPressed == 'a' || keyPressed == 'A')
-				mario.setDir(GameConfig::LEFT);
-			else if (descent == 0)
-				mario.setDir(GameConfig::ARROWKEYS::STAY);
+			else
+			{
+				gotoxy(0, GameConfig::HEIGHT + GameConfig::MIN_Y + 1);
+				cout << "Failure" << endl;
+			}
+			cout << "\nPress any key to return to the main menu";
+			_getch();
+			gameRunning = false;
 		}
-		if (mario.getPos().getY() >= GameConfig::MIN_Y + GameConfig::HEIGHT - 1) //Mario Fell Down
-		{
-			lives--;
-			restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
-		}
-
-		//Barrels
-		if (timetonextbarrel == currSettings.intervalsBetweenBarrels[currbarrelindex]) //Time to add next barrel
-		{
-			barrels.push_back(Barrel(donkeyKong.getPos(), currSettings.dirs[currbarrelindex]));
-			currbarrelindex++;
-			if (currbarrelindex == currSettings.size)
-				currbarrelindex = 0;
-			timetonextbarrel = 0;
-		}
-		else
-			timetonextbarrel++;
-
-		barrelsUpdateDirs(&barrels, level.getBoardPointer());//Set the exact direction for each barrel
-
-		for (auto& barel : barrels) //Move the barrels
-			barel.move();
-		
-		if (barrelsCheckHits(&barrels, mario)) //delete barrels that share same position (explosion)
-		{
-			//Mario is near an explosion
-			lives--;
-			restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
-		}
-			
-		
-		for (int i = 0;i < barrels.size();i++) //erasing all the barrels that are out of bounds
-		{
-			if (outOfBounds(barrels[i].getPos()))
-				barrels.erase(barrels.begin() + i);
-		}
-		mario.move();
-		if (marioHitsBarrel(barrels, mario))
-		{
-			//mario hit a barrel
-			lives--;
-			restart(&mario, level.getstartPosMario(), &barrels, &timetonextbarrel, &climb, &wPressed);
-		}
-		level.printLadders();
-		printLives(lives);
-		mario.draw();
-		for (auto& barel : barrels) //Draw the barrels
-			barel.draw();
-		Sleep(170);
-
-		//Print ' ' after mario
-		gotoxy(mario.getPos().getX(), mario.getPos().getY());
-		cout << " ";
-		//Print ' ' after the barrels
-		printBarrelTraces(barrels);
-		
-
-		if (mario.getPos() == pauline.getPos())
-		{
-			finished = true;
-			break;
-		}
-	} while (lives>0);
-
-	
-	if (finished)
-	{
-		gotoxy(0, GameConfig::HEIGHT + GameConfig::MIN_Y + 1);
-		cout << "Game Won" << endl;
 	}
-	else
-	{
-		gotoxy(0, GameConfig::HEIGHT + GameConfig::MIN_Y + 1);
-		cout << "Failure" << endl;
-	}
-		
-	return 0;
 }
