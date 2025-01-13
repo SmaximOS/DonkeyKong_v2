@@ -4,23 +4,23 @@
 
 using namespace std;
 
-Ladder::Ladder(Point _startpos, int _steps) :startpos(_startpos), steps(_steps* GameConfig::FLOORDIFF)
+
+void Ladder::draw() const//Overrides original function
 {
 
-}
-Ladder::Ladder()
-{
-
-	startpos = Point();
-	steps = 1 * GameConfig::FLOORDIFF;
-}
-void Ladder::draw()
-{
-
-	for (int i = this->getPos().getY();i > this->getPos().getY() - steps;i--)
+	for (int i = this->getPos().getY();i > this->getPos().getY() - (steps-1);i--)
 	{
 		gotoxy(this->getPos().getX(), i);
-		cout << 'H';
+		std::cout << representation;
 	}
 
+}
+
+Ladder Ladder:: operator =(const Ladder& other)
+{
+	if (this != &other)
+		steps = other.steps;
+
+	GameObject::operator=(other);
+	return *this;
 }

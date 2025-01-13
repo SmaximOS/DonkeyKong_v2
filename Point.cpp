@@ -4,7 +4,7 @@ Point::Point(int x, int y)
 	this->x = x;
 	this->y = y;
 }
-double Point::calculateDistance(Point other)
+double Point::calculateDistance(const Point& other)
 {
 	int dx = x - other.x;
 	int dy = y - other.y;

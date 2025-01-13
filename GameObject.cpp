@@ -1,58 +1,12 @@
 #include "GameObject.h"
-#include <conio.h>
-#include <windows.h>
-#include <process.h>
-#include <iostream>
-
-using namespace std;
-
-GameObject::GameObject(Point startpos, char representation)
+GameObject GameObject:: operator =(const GameObject& other)
 {
-	this->dir = GameConfig::ARROWKEYS::STAY;
-	this->pos = startpos;
-	this->representation = representation;
-}
-
-void GameObject::move()
-{
-	
-	switch (dir)
+	if (&other != this)
 	{
-	case GameConfig::UP:
-		(pos.setY(pos.getY() - 1));
-		break;
-	case GameConfig::DOWN:
-		(pos.setY(pos.getY() + 1));
-		break;
-	case GameConfig::RIGHT:
-		(pos.setX(pos.getX() + 1));
-		break;
-	case GameConfig::LEFT:
-		(pos.setX(pos.getX() - 1));
-		break;
-	case GameConfig::STAY:
-		break;
-	case GameConfig::DOWNANDLEFT:
-		(pos.setY(pos.getY() + 1));
-		(pos.setX(pos.getX() - 1));
-		break;
-	case GameConfig::DOWNANDRIGHT:
-		(pos.setY(pos.getY() + 1));
-		(pos.setX(pos.getX() + 1));
-		break;
-	case GameConfig::UPANDLEFT:
-		(pos.setY(pos.getY() - 1));
-		(pos.setX(pos.getX() - 1));
-		break;
-	case GameConfig::UPANDRIGHT:
-		(pos.setY(pos.getY() - 1));
-		(pos.setX(pos.getX() + 1));
-		break;
+		this->pos = other.pos;
+		this->representation = other.representation;
 	}
+		
+	return *this;
+	//Not copying representation because its const
 }
-void GameObject::draw()
-{
-	gotoxy(pos.getX(), pos.getY());
-	cout << representation;
-}
-

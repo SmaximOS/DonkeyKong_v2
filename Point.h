@@ -7,12 +7,12 @@ class Point
 	int y;
 
 public:
-	Point(int x = GameConfig::MIN_X + 3, int y = GameConfig::FLOOR1 - 1);
+	Point(int x = 0, int y = 0);
 	
-	double calculateDistance(Point other);
-	int getX() { return x; };
-	int getY() { return y; };
+	double calculateDistance(const Point& other);
+	int getX() const { return x; };
+	int getY() const { return y; };
 	void setX(int x) { this->x = x; };
 	void setY(int y) { this->y = y; };
-	bool operator ==(Point other) { return x == other.x && y == other.y; };
+	bool operator ==(const Point& other) { return x == other.x && y == other.y; };
 };

@@ -32,7 +32,7 @@ void Level::addLadder(Ladder ladder)
     else
         ladders = (Ladder*)realloc(ladders, sizeof(Ladder) * numLadders);
 
-    ladders[numLadders - 1] = ladder;
+    ladders[numLadders - 1]=ladder;
 }
 
 Ladder Level::getLadder(int index) const {
@@ -50,27 +50,27 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
 
     // Method to print the board
         void Level::printBoard() const
-    {
-        int y = GameConfig::FLOOR1;
+       {
+        int y = getFloorYcoor(0);
         for (int i = 0; i < GameConfig::NUMFLOORS; i++)
         {
-            int x = GameConfig::MIN_X + 1; // Start inside the border
+            int x =GameConfig::MIN_X+ 1; // Start inside the border
             for (int j = 0; j < GameConfig::WIDTH - 2; j++) // Full width now
             {
                 gotoxy(x, y);
                 switch (board[i][j])
                 {
                 case 1:
-                    cout << '=';
+                    std::cout << '=';
                     break;
                 case 2:
-                    cout << '>';
+                    std::cout << '>';
                     break;
                 case 3:
-                    cout << '<';
+                    std::cout << '<';
                     break;
                 case 0:
-                    cout << ' ';
+                    std::cout << ' ';
                     break;
                 }
                 x++;
@@ -79,16 +79,16 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
             switch (board[i][GameConfig::WIDTH - 3])
             {
             case 1:
-                cout << '=';
+                std::cout << '=';
                 break;
             case 2:
-                cout << '>';
+                std::cout << '>';
                 break;
             case 3:
-                cout << '<';
+                std::cout << '<';
                 break;
             case 0:
-                cout << ' ';
+                std::cout << ' ';
                 break;
             }
             y -= GameConfig::FLOORDIFF;
@@ -104,6 +104,21 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
             ladders[i].draw();
         }
     }
+   
+
+    void Level::initLevel()
+    {
+        // Initialize board to 0 (no floor)
+        memset(board, 0, sizeof(board));
+
+        numLadders = 0;
+        // Allocate memory for ladders
+        ladders = nullptr;
+
+        ghosts = vector<Ghost>();
+        setLegendPos({ GameConfig::LEGENDXCOOR,GameConfig::LEGENDYCOOR });
+    }
+
     void Level::initializeBoard1()
     {
         int i;
@@ -127,8 +142,6 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
             board[1][i] = 1;
         board[1][74] = 2;
 
-        for (i = 78;i < GameConfig::WIDTH - 2;i++)
-            board[1][i] = 1;
 
         //Floor3
         for (i = 4;i <= 19;i++)
@@ -141,19 +154,18 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
 
         for (i = 67;i <= 80;i++)
             board[2][i] = 1;
-        for (i = 85;i < GameConfig::WIDTH - 2;i++)
-            board[2][i] = 1;
+        
 
         //Floor4
-        for (i = 12;i <= 31;i++)
+        for (i = 0;i <= 32;i++)
             board[3][i] = 1;
-        board[3][31] = 2;
+        board[3][32] = 2;
 
         for (i = 34;i <= 43;i++)
             board[3][i] = 1;
         board[3][43] = 2;
 
-        for (i = 55;i <= 100;i++)
+        for (i = 55; i < GameConfig::WIDTH - 2;i++)
             board[3][i] = 1;
         board[3][55] = 3;
 
@@ -168,9 +180,7 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
         for (i = 26;i <= 66;i++)
             board[5][i] = 1;
         board[5][26] = 3;
-        for (i = 83;i < GameConfig::WIDTH - 2;i++)
-            board[5][i] = 1;
-        board[5][83] = 3;
+        
 
         //Floor7
         for (i = 4;i <= 19;i++)
@@ -178,13 +188,12 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
         for (i = 22;i <= 34;i++)
             board[6][i] = 1;
         board[6][34] = 2;
-        for (i = 47;i <= 60;i++)
+        for (i = 47;i <= 61;i++)
             board[6][i] = 1;
         for (i = 63;i <= 73;i++)
             board[6][i] = 1;
         board[6][73] = 2;
-        for (i = 82;i <= 98;i++)
-            board[6][i] = 1;
+        
 
         //Floor8
         for (i = 0;i <= 30;i++)
@@ -194,22 +203,23 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
 
         //Ladders
 
-        addLadder(Ladder(Point(GameConfig::MIN_X + 10, GameConfig::FLOOR1 - 1), 5));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 30, GameConfig::FLOOR1 - 1), 2));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 73, GameConfig::FLOOR1 - 1), 2));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 92, GameConfig::FLOOR2 - 1), 2));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 60, GameConfig::FLOOR4 - 1), 2));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 28, GameConfig::FLOOR6 - 1), 2));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 97, GameConfig::FLOOR2 - 1), 5));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 55, GameConfig::FLOOR6 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 37, GameConfig::FLOOR4 - 1), 1));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 10, getFloorYcoor(0)-1), 5));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 30, getFloorYcoor(0)-1), 2));
+        addLadder(Ladder(Point(GameConfig::MIN_X + 73, getFloorYcoor(0)-1), 2));
+        
+        addLadder(Ladder(Point(getBoardPos().getX() + 60, getFloorYcoor(3)-1), 2));
+        addLadder(Ladder(Point(getBoardPos().getX() + 28, getFloorYcoor(5)-1), 2));
+       
+        addLadder(Ladder(Point(getBoardPos().getX() + 55, getFloorYcoor(5)-1), 1));
+        addLadder(Ladder(Point(getBoardPos().getX() + 37, getFloorYcoor(3)-1), 1));
 
         
 
         //Characters starting Positions
-        setstartPosMario(Point());  //Default Position
-        setstartPosPauline(Point(GameConfig::MIN_X + 2, GameConfig::FLOORS::FLOOR8 - 1));
-        setstartPosDonkeyKong(Point(GameConfig::MIN_X + 54, GameConfig::FLOORS::FLOOR8 - 1));
+        setstartPosMario(Point(getBoardPos().getX() + 1, getFloorYcoor(0)-1));  //Default Position
+        setstartPosPauline(Point(getBoardPos().getX() + 2, getFloorYcoor(7)-1));
+        setstartPosDonkeyKong(Point(getBoardPos().getX() + 54, getFloorYcoor(7)-1));
+        setPosHammer(Point(getBoardPos().getX()+70, getFloorYcoor(7)-1));
 
         //Barrels Settings
         barrelsSets.size = 4; //indicates that throwing barrels will repeat itself every 4 barrels
@@ -224,6 +234,9 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
         barrelsSets.dirs[2] = GameConfig::ARROWKEYS::LEFT;
         barrelsSets.dirs[3] = GameConfig::ARROWKEYS::RIGHT;
 
+        //Ghosts
+        ghosts.push_back(Point(getBoardPos().getX() + 30, getFloorYcoor(3) - 1));
+
     }
     void Level::initializeBoard2()
     {
@@ -235,33 +248,32 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
 
         board[0][0] = 3;//Right Slope
 
-        for (i = 31; i <= 38; i++)
+        for (i = 30; i <= 38; i++)
             board[0][i] = 1;
-        board[0][31] = 3;
+        board[0][30] = 3;
 
-        for (i = 41;i < 52;i++)
+        for (i = 40;i < 52;i++)
             board[0][i] = 1;
         board[0][52] = 2;
 
         //Floor2
-        for (i = 10;i <= 32;i++)
+        for (i = 9;i <= 32;i++)
             board[1][i] = 1;
         board[1][32] = 2;
 
-        for (i = 47;i <= 59;i++)
+        for (i = 46;i <= 59;i++)
             board[1][i] = 1;
-        board[1][47] = 3;
+        board[1][46] = 3;
 
-        for (i = 62;i < 90;i++)
+        for (i = 61;i < GameConfig::WIDTH-2;i++)
             board[1][i] = 1;
-        board[1][90] = 2;
 
         //Floor3
         for (i = 0;i <= 21;i++)
             board[2][i] = 1;
         board[2][21] = 2;
 
-        for (i = 28; i <= 36; i++)
+        for (i = 28; i <= 38; i++)
             board[2][i] = 1;
         board[2][28] = 3;
 
@@ -269,21 +281,21 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
             board[2][i] = 1;
         board[2][50] = 2;
 
-        for (i = 53; i <= 57; i++)
+        for (i = 52; i <= 57; i++)
             board[2][i] = 1;
-        board[2][53] = 3;
+        board[2][52] = 3;
 
-        for (i = 61; i <= 65; i++)
+        for (i = 59; i <= 65; i++)
             board[2][i] = 1;
         board[2][65] = 2;
 
-        for (i = 68; i <= 72; i++)
+        for (i = 67; i <= 72; i++)
             board[2][i] = 1;
-        board[2][68] = 3;
+        board[2][67] = 3;
 
-        for (i = 80;i < GameConfig::WIDTH - 2;i++)
-            board[2][i] = 1;
-        board[2][80] = 3;
+       // for (i = 80;i < GameConfig::WIDTH - 2;i++)
+            //board[2][i] = 1;
+       // board[2][80] = 3;
 
         //Floor4
         for (i = 3;i <= 26;i++)
@@ -294,18 +306,18 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
             board[3][i] = 1;
         board[3][32] = 3;
 
-        for (i = 70;i <= 85;i++)
+        for (i = 70;i <GameConfig::WIDTH-2;i++)
             board[3][i] = 1;
         board[3][70] = 3;
 
         //Floor5
-        for (i = 30; i <= 39; i++)
+        for (i = 29; i <= 39; i++)
             board[4][i] = 1;
-       // board[4][39] = 2;
+       
 
-        for (i = 15; i <= 27; i++)
+        for (i = 14; i <= 27; i++)
             board[4][i] = 1;
-        board[4][15] = 3;
+        board[4][14] = 3;
 
         for (i = 2; i <= 12; i++)
             board[4][i] = 1;
@@ -335,19 +347,19 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
             board[6][i] = 1;
         board[6][4] = 3;
 
-        for (i = 22;i <= 34;i++)
+        for (i = 21;i <= 34;i++)
             board[6][i] = 1;
         board[6][34] = 2;
 
-        for (i = 37; i <= 44; i++)
+        for (i = 36; i <= 44; i++)
             board[6][i] = 1;
-        board[6][37] = 3;
+        board[6][36] = 3;
 
-        for (i = 47;i <= 60;i++)
+        for (i = 46;i <= 60;i++)
             board[6][i] = 1;
         board[6][60] = 2;
 
-        for (i = 63;i <= 73;i++)
+        for (i = 62;i <= 73;i++)
             board[6][i] = 1;
         board[6][73] = 2;
 
@@ -360,25 +372,24 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
 
         //Ladders
 
-        addLadder(Ladder(Point(GameConfig::MIN_X + 12, GameConfig::FLOOR1 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 50, GameConfig::FLOOR1 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 89, GameConfig::FLOOR2 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 15, GameConfig::FLOOR2 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 6, GameConfig::FLOOR3 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 34, GameConfig::FLOOR3 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 83, GameConfig::FLOOR3 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 47, GameConfig::FLOOR3 - 1), 3));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 73, GameConfig::FLOOR3 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 5, GameConfig::FLOOR5 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 37, GameConfig::FLOOR4 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 72, GameConfig::FLOOR6 - 1), 1));
-        addLadder(Ladder(Point(GameConfig::MIN_X + 10, GameConfig::FLOOR7 - 1), 1));
+        addLadder(Ladder(Point(getBoardPos().getX() + 12, getFloorYcoor(0)-1), 1));
+        addLadder(Ladder(Point(getBoardPos().getX() + 50, getFloorYcoor(0)-1), 1));
+        addLadder(Ladder(Point(getBoardPos().getX() + 15, getFloorYcoor(1)-1), 1));
+        addLadder(Ladder(Point(getBoardPos().getX() + 6, getFloorYcoor(2)-1), 1));
+        addLadder(Ladder(Point(getBoardPos().getX() + 34, getFloorYcoor(2)-1), 1));
+        addLadder(Ladder(Point(getBoardPos().getX() + 47, getFloorYcoor(2)-1), 3));
+        addLadder(Ladder(Point(getBoardPos().getX() + 75, getFloorYcoor(1)-1), 2));
+        addLadder(Ladder(Point(getBoardPos().getX() + 5, getFloorYcoor(4)-1), 1));
+        addLadder(Ladder(Point(getBoardPos().getX() + 37, getFloorYcoor(3)-1), 1));
+        addLadder(Ladder(Point(getBoardPos().getX() + 72, getFloorYcoor(5)-1), 1));
+        addLadder(Ladder(Point(getBoardPos().getX() + 10, getFloorYcoor(6)-1), 1));
 
 
         //Characters starting Positions
-        setstartPosMario(Point());  //Default Position
-        setstartPosPauline(Point(GameConfig::MIN_X + 2, GameConfig::FLOORS::FLOOR8 - 1));
-        setstartPosDonkeyKong(Point(GameConfig::MIN_X + 54, GameConfig::FLOORS::FLOOR8 - 1));
+        setstartPosMario(Point(getBoardPos().getX() + 1, getFloorYcoor(0)-1));  //Default Position
+        setstartPosPauline(Point(getBoardPos().getX() + 2, getFloorYcoor(7)-1));
+        setstartPosDonkeyKong(Point(getBoardPos().getX() + 54, getFloorYcoor(7)-1));
+        setPosHammer(Point(getBoardPos().getX()+41, getFloorYcoor(2)-1));
 
         //Barrels Settings
         barrelsSets.size = 4; //indicates that throwing barrels will repeat itself every 4 barrels
@@ -395,6 +406,10 @@ char(*Level::getBoardPointer())[GameConfig::WIDTH - 2] {
         barrelsSets.dirs[3] = GameConfig::ARROWKEYS::RIGHT;
         barrelsSets.dirs[3] = GameConfig::ARROWKEYS::LEFT;
 
+        //Ghosts positions
+        ghosts.push_back(Point(getBoardPos().getX() + 20, getFloorYcoor(5)-1));
+        ghosts.push_back(Point(getBoardPos().getX() + 40, getFloorYcoor(5)-1));
+        ghosts.push_back(Point(getBoardPos().getX() + 60, getFloorYcoor(6)-1));
     }
 
 

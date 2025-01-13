@@ -1,30 +1,24 @@
 #pragma once
 #include <iostream>
-#include "Point.h"
-#include "GameConfig.h"
+#include "MovableObject.h"
+#include "general.h"
 
-using namespace std;
 
-class Barrel
+class Barrel : public MovableObject
 {
-	Point pos;
-	GameConfig::ARROWKEYS dir;
+private:
+	int fallsecs;
 	
-
 public:
-	Barrel(Point _startpos,GameConfig::ARROWKEYS _dir);
-	void draw();
+	Barrel(Point _startpos, GameConfig::ARROWKEYS _dir) : MovableObject('O', _startpos, _dir) { fallsecs = 0; }
 	void move();
-	void setPos(int x, int y) { pos.setX(x);pos.setY(y); }
-	Point getPos() { return pos; }
-	void setDir(GameConfig::ARROWKEYS newdir) { dir = newdir; }
-	GameConfig::ARROWKEYS getDir(){ return dir; }
-	
+	int getFallSecs() const { return fallsecs; }
+	void setFallSecs(int _fallsecs) { fallsecs = _fallsecs; }
 };
 	
 typedef struct  LEVELSETTINGS
 {
-	int size; //The size of the barrels to repeat  
+	int size; //The size of the barrels array to repeat  
 	int* intervalsBetweenBarrels; //the intervals between each barrel (size)
 	GameConfig::ARROWKEYS* dirs; // the initial direction of each barrel
 

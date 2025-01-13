@@ -1,14 +1,16 @@
 #pragma once
-#include "Point.h"
-class Ladder
+#include "GameObject.h"
+class Ladder : public GameObject
 {
-	Point startpos;
 	int steps;
-
 public:
-	Ladder(Point _startpos, int _steps = 1);
-	Ladder();
-	void draw();
-	int getSteps() { return steps; }
-	Point getPos() { return startpos; }
+	Ladder(Point _startpos, int _steps = 1) : GameObject('H',_startpos),steps(_steps*GameConfig::FLOORDIFF){}
+	void draw() const;
+	int getSteps() const { return steps; }
+	Ladder operator =(const Ladder& other);
 };
+
+typedef struct Laddebuild
+{
+
+}Ladderbuild;

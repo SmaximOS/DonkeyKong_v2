@@ -1,24 +1,21 @@
 #pragma once
-#include "GameConfig.h"
 #include "Point.h"
 #include "general.h"
+#include <iostream>
 class GameObject
 {
-
-private:
-
-	Point pos;
+protected :
 	char representation;
-	GameConfig::ARROWKEYS dir;
-
-public:
-	GameObject(Point startpos, char representation);
-	Point getPos() { return pos; };
-	void setPos(int x, int y) { this->pos.setX(x); this->pos.setY(y); }
+	Point pos;
+public : 
+	GameObject(char _representation, Point _pos) : pos(_pos), representation(_representation){}
+	GameObject(char _representation) : representation(_representation){}
+	void draw() const {
+		gotoxy(pos.getX(), pos.getY());std::cout << representation;
+	}
 	char getRepresentation() { return representation; };
-	GameConfig::ARROWKEYS getDir() { return dir; };
-	void setDir(GameConfig::ARROWKEYS newdir) { dir = newdir; };
-	void draw();
-	void move();
-	int getCurrentFloor() { return (GameConfig::NUMFLOORS)-((pos.getY() - (GameConfig::MIN_Y - 1)) / GameConfig::FLOORDIFF); }
+	Point getPos() const { return pos; } 
+	void setPos(const Point& _newpos) { pos = _newpos; }
+	GameObject operator =(const GameObject& other);
 };
+
